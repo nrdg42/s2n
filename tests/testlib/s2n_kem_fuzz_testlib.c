@@ -20,19 +20,19 @@
 
 
 int s2n_kem_recv_ciphertext_fuzz_test_init(const char *kat_file_path, struct s2n_kem_params *kem_params) {
-    notnull_check(kat_file_path);
-    notnull_check(kem_params);
+    POSIX_ENSURE_REF(kat_file_path);
+    POSIX_ENSURE_REF(kem_params);
 
 #if defined(S2N_NO_PQ)
     return S2N_FAILURE;
 #else
-    notnull_check(kem_params->kem);
+    POSIX_ENSURE_REF(kem_params->kem);
 
-    GUARD(s2n_alloc(&kem_params->private_key, kem_params->kem->private_key_length));
+    POSIX_GUARD(s2n_alloc(&kem_params->private_key, kem_params->kem->private_key_length));
 
     FILE *kat_file = fopen(kat_file_path, "r");
-    notnull_check(kat_file);
-    GUARD(ReadHex(kat_file, kem_params->private_key.data, kem_params->kem->private_key_length, "sk = "));
+    POSIX_ENSURE_REF(kat_file);
+    POSIX_GUARD(ReadHex(kat_file, kem_params->private_key.data, kem_params->kem->private_key_length, "sk = "));
     fclose(kat_file);
 
     return S2N_SUCCESS;
@@ -40,20 +40,20 @@ int s2n_kem_recv_ciphertext_fuzz_test_init(const char *kat_file_path, struct s2n
 }
 
 int s2n_kem_recv_ciphertext_fuzz_test(const uint8_t *buf, size_t len, struct s2n_kem_params *kem_params) {
-    notnull_check(buf);
-    notnull_check(kem_params);
+    POSIX_ENSURE_REF(buf);
+    POSIX_ENSURE_REF(kem_params);
 
 #if defined(S2N_NO_PQ)
     return S2N_FAILURE;
 #else
-    notnull_check(kem_params->kem);
+    POSIX_ENSURE_REF(kem_params->kem);
 
     /* Because of the way BIKE1_L1_R1's decapsulation function is written, this test will not work for that KEM. */
-    ENSURE_POSIX(kem_params->kem != &s2n_bike1_l1_r1, S2N_ERR_KEM_UNSUPPORTED_PARAMS);
+    POSIX_ENSURE(kem_params->kem != &s2n_bike1_l1_r1, S2N_ERR_KEM_UNSUPPORTED_PARAMS);
 
     struct s2n_stuffer ciphertext = { 0 };
-    GUARD(s2n_stuffer_growable_alloc(&ciphertext, 8192));
-    GUARD(s2n_stuffer_write_bytes(&ciphertext, buf, len));
+    POSIX_GUARD(s2n_stuffer_growable_alloc(&ciphertext, 8192));
+    POSIX_GUARD(s2n_stuffer_write_bytes(&ciphertext, buf, len));
 
     /* Don't GUARD here; this will probably fail. */
     s2n_kem_recv_ciphertext(&ciphertext, kem_params);
@@ -62,30 +62,30 @@ int s2n_kem_recv_ciphertext_fuzz_test(const uint8_t *buf, size_t len, struct s2n
      * we check it with GUARD. */
     if (kem_params->shared_secret.allocated == 0) {
         /* If s2n_kem_recv_ciphertext failed, this probably did not get allocated. */
-        GUARD(s2n_alloc(&kem_params->shared_secret, kem_params->kem->shared_secret_key_length));
+        POSIX_GUARD(s2n_alloc(&kem_params->shared_secret, kem_params->kem->shared_secret_key_length));
     }
-    GUARD(kem_params->kem->decapsulate(kem_params->shared_secret.data, ciphertext.blob.data, kem_params->private_key.data));
+    POSIX_GUARD(kem_params->kem->decapsulate(kem_params->shared_secret.data, ciphertext.blob.data, kem_params->private_key.data));
 
     /* Clean up */
-    GUARD(s2n_stuffer_free(&ciphertext));
-    GUARD(s2n_free(&kem_params->shared_secret));
+    POSIX_GUARD(s2n_stuffer_free(&ciphertext));
+    POSIX_GUARD(s2n_free(&kem_params->shared_secret));
 
     return S2N_SUCCESS;
 #endif
 }
 
 int s2n_kem_recv_public_key_fuzz_test(const uint8_t *buf, size_t len, struct s2n_kem_params *kem_params) {
-    notnull_check(buf);
-    notnull_check(kem_params);
+    POSIX_ENSURE_REF(buf);
+    POSIX_ENSURE_REF(kem_params);
 
 #if defined(S2N_NO_PQ)
     return S2N_FAILURE;
 #else
-    notnull_check(kem_params->kem);
+    POSIX_ENSURE_REF(kem_params->kem);
 
     struct s2n_stuffer public_key = { 0 };
-    GUARD(s2n_stuffer_growable_alloc(&public_key, 8192));
-    GUARD(s2n_stuffer_write_bytes(&public_key, buf, len));
+    POSIX_GUARD(s2n_stuffer_growable_alloc(&public_key, 8192));
+    POSIX_GUARD(s2n_stuffer_write_bytes(&public_key, buf, len));
 
     /* s2n_kem_recv_public_key performs only very basic checks, like ensuring
      * that the public key size is correct. If the received public key passes,
@@ -96,15 +96,15 @@ int s2n_kem_recv_public_key_fuzz_test(const uint8_t *buf, size_t len, struct s2n
          * should always succeed, even if the public key is not valid. So, we check it
          * with GUARD. */
         struct s2n_stuffer out = {0};
-        GUARD(s2n_stuffer_growable_alloc(&out, 8192));
-        GUARD(s2n_kem_send_ciphertext(&out, kem_params));
+        POSIX_GUARD(s2n_stuffer_growable_alloc(&out, 8192));
+        POSIX_GUARD(s2n_kem_send_ciphertext(&out, kem_params));
 
-        GUARD(s2n_stuffer_free(&out));
+        POSIX_GUARD(s2n_stuffer_free(&out));
     }
 
     /* Clean up */
-    GUARD(s2n_stuffer_free(&public_key));
-    GUARD(s2n_kem_free(kem_params));
+    POSIX_GUARD(s2n_stuffer_free(&public_key));
+    POSIX_GUARD(s2n_kem_free(kem_params));
 
     return S2N_SUCCESS;
 #endif

@@ -76,18 +76,18 @@ encrypt(OUT ct_t *ct,
   p_pk[1].val   = pk->val[1];
 
   DMSG("    Sampling m.\n");
-  GUARD(sample_uniform_r_bits(&m.val, seed, NO_RESTRICTION));
+  POSIX_GUARD(sample_uniform_r_bits(&m.val, seed, NO_RESTRICTION));
 
   DMSG("    Calculating the ciphertext.\n");
 
-  GUARD(gf2x_mod_mul((uint64_t *)&p_ct[0], (uint64_t *)&m, (uint64_t *)&p_pk[0]));
-  GUARD(gf2x_mod_mul((uint64_t *)&p_ct[1], (uint64_t *)&m, (uint64_t *)&p_pk[1]));
+  POSIX_GUARD(gf2x_mod_mul((uint64_t *)&p_ct[0], (uint64_t *)&m, (uint64_t *)&p_pk[0]));
+  POSIX_GUARD(gf2x_mod_mul((uint64_t *)&p_ct[1], (uint64_t *)&m, (uint64_t *)&p_pk[1]));
 
   DMSG("    Addding Error to the ciphertext.\n");
 
-  GUARD(
+  POSIX_GUARD(
       gf2x_add(p_ct[0].val.raw, p_ct[0].val.raw, splitted_e->val[0].raw, R_SIZE));
-  GUARD(
+  POSIX_GUARD(
       gf2x_add(p_ct[1].val.raw, p_ct[1].val.raw, splitted_e->val[1].raw, R_SIZE));
 
   // Copy the data outside
@@ -111,12 +111,12 @@ calc_pk(OUT pk_t *pk, IN const seed_t *g_seed, IN const pad_sk_t p_sk)
   // Intialized padding to zero
   DEFER_CLEANUP(padded_r_t g = {0}, padded_r_cleanup);
 
-  GUARD(sample_uniform_r_bits(&g.val, g_seed, MUST_BE_ODD));
+  POSIX_GUARD(sample_uniform_r_bits(&g.val, g_seed, MUST_BE_ODD));
 
   // Calculate (g0, g1) = (g*h1, g*h0)
-  GUARD(gf2x_mod_mul((uint64_t *)&p_pk[0], (const uint64_t *)&g,
+  POSIX_GUARD(gf2x_mod_mul((uint64_t *)&p_pk[0], (const uint64_t *)&g,
                      (const uint64_t *)&p_sk[1]));
-  GUARD(gf2x_mod_mul((uint64_t *)&p_pk[1], (const uint64_t *)&g,
+  POSIX_GUARD(gf2x_mod_mul((uint64_t *)&p_pk[1], (const uint64_t *)&g,
                      (const uint64_t *)&p_sk[0]));
 
   // Copy the data to the output parameters.
@@ -173,14 +173,14 @@ BIKE1_L1_R1_crypto_kem_keypair(OUT unsigned char *pk, OUT unsigned char *sk)
   DMSG("    Calculating the secret key.\n");
 
   // h0 and h1 use the same context
-  GUARD(init_aes_ctr_prf_state(&h_prf_state, MAX_AES_INVOKATION, &seeds.seed[0]));
+  POSIX_GUARD(init_aes_ctr_prf_state(&h_prf_state, MAX_AES_INVOKATION, &seeds.seed[0]));
 
-  GUARD(generate_sparse_rep((uint64_t *)&p_sk[0], l_sk.wlist[0].val, DV, R_BITS,
+  POSIX_GUARD(generate_sparse_rep((uint64_t *)&p_sk[0], l_sk.wlist[0].val, DV, R_BITS,
                             sizeof(p_sk[0]), &h_prf_state));
   // Copy data
   l_sk.bin[0] = p_sk[0].val;
 
-  GUARD(generate_sparse_rep((uint64_t *)&p_sk[1], l_sk.wlist[1].val, DV, R_BITS,
+  POSIX_GUARD(generate_sparse_rep((uint64_t *)&p_sk[1], l_sk.wlist[1].val, DV, R_BITS,
                             sizeof(p_sk[1]), &h_prf_state));
 
   // Copy data
@@ -188,7 +188,7 @@ BIKE1_L1_R1_crypto_kem_keypair(OUT unsigned char *pk, OUT unsigned char *sk)
 
   DMSG("    Calculating the public key.\n");
 
-  GUARD(calc_pk(l_pk, &seeds.seed[1], p_sk));
+  POSIX_GUARD(calc_pk(l_pk, &seeds.seed[1], p_sk));
 
   memcpy(sk, &l_sk, sizeof(l_sk));
 
@@ -226,11 +226,11 @@ BIKE1_L1_R1_crypto_kem_enc(OUT unsigned char *     ct,
 
   // Random data generator
   // Using first seed
-  GUARD(init_aes_ctr_prf_state(&e_prf_state, MAX_AES_INVOKATION, &seeds.seed[0]));
+  POSIX_GUARD(init_aes_ctr_prf_state(&e_prf_state, MAX_AES_INVOKATION, &seeds.seed[0]));
 
   DMSG("    Generating error.\n");
   ALIGN(8) compressed_idx_t_t dummy;
-  GUARD(generate_sparse_rep((uint64_t *)&e, dummy.val, T1, N_BITS, sizeof(e),
+  POSIX_GUARD(generate_sparse_rep((uint64_t *)&e, dummy.val, T1, N_BITS, sizeof(e),
                             &e_prf_state));
 
   print("e:  ", (uint64_t *)&e.val, sizeof(e) * 8);
@@ -245,7 +245,7 @@ BIKE1_L1_R1_crypto_kem_enc(OUT unsigned char *     ct,
   // Computing ct = enc(pk, e)
   // Using second seed
   DMSG("    Encrypting.\n");
-  GUARD(encrypt(l_ct, l_pk, &seeds.seed[1], &splitted_e));
+  POSIX_GUARD(encrypt(l_ct, l_pk, &seeds.seed[1], &splitted_e));
 
   DMSG("    Generating shared secret.\n");
   get_ss(l_ss, &e.val);
@@ -278,10 +278,10 @@ BIKE1_L1_R1_crypto_kem_dec(OUT unsigned char *     ss,
   DEFER_CLEANUP(e_t merged_e = {0}, e_cleanup);
 
   DMSG("  Computing s.\n");
-  GUARD(compute_syndrome(&syndrome, l_ct, &l_sk));
+  POSIX_GUARD(compute_syndrome(&syndrome, l_ct, &l_sk));
 
   DMSG("  Decoding.\n");
-  GUARD(decode(&e, &syndrome, l_ct, &l_sk));
+  POSIX_GUARD(decode(&e, &syndrome, l_ct, &l_sk));
 
   // Check if the error weight equals T1
   if(T1 != r_bits_vector_weight(&e.val[0]) + r_bits_vector_weight(&e.val[1]))

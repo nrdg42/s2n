@@ -1022,7 +1022,7 @@ int s2n_cipher_suites_init(void)
         if (cur_suite->sslv3_record_alg && cur_suite->sslv3_record_alg->cipher->is_available()) {
             struct s2n_blob cur_suite_mem = { .data = (uint8_t *) cur_suite, .size = sizeof(struct s2n_cipher_suite) };
             struct s2n_blob new_suite_mem = { 0 };
-            GUARD(s2n_dup(&cur_suite_mem, &new_suite_mem));
+            POSIX_GUARD(s2n_dup(&cur_suite_mem, &new_suite_mem));
 
             struct s2n_cipher_suite *new_suite = (struct s2n_cipher_suite *)(void *)new_suite_mem.data;
             new_suite->available = 1;
@@ -1054,7 +1054,7 @@ int s2n_cipher_suites_cleanup(void)
 
         /* Release custom SSLv3 cipher suites */
         if (cur_suite->sslv3_cipher_suite != cur_suite) {
-            GUARD(s2n_free_object((uint8_t **)&cur_suite->sslv3_cipher_suite, sizeof(struct s2n_cipher_suite)));
+            POSIX_GUARD(s2n_free_object((uint8_t **)&cur_suite->sslv3_cipher_suite, sizeof(struct s2n_cipher_suite)));
         }
         cur_suite->sslv3_cipher_suite = NULL;
     }
@@ -1094,24 +1094,24 @@ struct s2n_cipher_suite *s2n_cipher_suite_from_wire(const uint8_t cipher_suite[S
 
 int s2n_set_cipher_as_client(struct s2n_connection *conn, uint8_t wire[S2N_TLS_CIPHER_SUITE_LEN])
 {
-    notnull_check(conn);
-    notnull_check(conn->secure.cipher_suite);
+    POSIX_ENSURE_REF(conn);
+    POSIX_ENSURE_REF(conn->secure.cipher_suite);
     struct s2n_cipher_suite *cipher_suite;
 
     /* See if the cipher is one we support */
     cipher_suite = s2n_cipher_suite_from_wire(wire);
-    ENSURE_POSIX(cipher_suite != NULL, S2N_ERR_CIPHER_NOT_SUPPORTED);
+    POSIX_ENSURE(cipher_suite != NULL, S2N_ERR_CIPHER_NOT_SUPPORTED);
 
     /* Verify cipher suite sent in server hello is the same as sent in hello retry */
     if (s2n_is_hello_retry_handshake(conn) && !s2n_is_hello_retry_message(conn)) {
-        ENSURE_POSIX(conn->secure.cipher_suite->iana_value == cipher_suite->iana_value, S2N_ERR_CIPHER_NOT_SUPPORTED);
+        POSIX_ENSURE(conn->secure.cipher_suite->iana_value == cipher_suite->iana_value, S2N_ERR_CIPHER_NOT_SUPPORTED);
         return S2N_SUCCESS;
     }
     conn->secure.cipher_suite = cipher_suite;
 
     /* Verify the cipher was part of the originally offered list */
     const struct s2n_cipher_preferences *cipher_prefs;
-    GUARD(s2n_connection_get_cipher_preferences(conn, &cipher_prefs));
+    POSIX_GUARD(s2n_connection_get_cipher_preferences(conn, &cipher_prefs));
 
     uint8_t found = 0;
 
@@ -1134,7 +1134,7 @@ int s2n_set_cipher_as_client(struct s2n_connection *conn, uint8_t wire[S2N_TLS_C
     /* For SSLv3 use SSLv3-specific ciphers */
     if (conn->actual_protocol_version == S2N_SSLv3) {
         conn->secure.cipher_suite = conn->secure.cipher_suite->sslv3_cipher_suite;
-        notnull_check(conn->secure.cipher_suite);
+        POSIX_ENSURE_REF(conn->secure.cipher_suite);
     }
 
     return 0;
@@ -1166,7 +1166,7 @@ static int s2n_set_cipher_as_server(struct s2n_connection *conn, uint8_t *wire, 
         uint8_t fallback_scsv[S2N_TLS_CIPHER_SUITE_LEN] = { TLS_FALLBACK_SCSV };
         if (s2n_wire_ciphers_contain(fallback_scsv, wire, count, cipher_suite_len)) {
             conn->closed = 1;
-            S2N_ERROR(S2N_ERR_FALLBACK_DETECTED);
+            POSIX_BAIL(S2N_ERR_FALLBACK_DETECTED);
         }
     }
 
@@ -1176,7 +1176,7 @@ static int s2n_set_cipher_as_server(struct s2n_connection *conn, uint8_t *wire, 
     }
 
     const struct s2n_security_policy *security_policy;
-    GUARD(s2n_connection_get_security_policy(conn, &security_policy));
+    POSIX_GUARD(s2n_connection_get_security_policy(conn, &security_policy));
 
     /* s2n supports only server order */
     for (int i = 0; i < security_policy->cipher_preferences->count; i++) {
@@ -1238,7 +1238,7 @@ static int s2n_set_cipher_as_server(struct s2n_connection *conn, uint8_t *wire, 
         return 0;
     }
 
-    S2N_ERROR(S2N_ERR_CIPHER_NOT_SUPPORTED);
+    POSIX_BAIL(S2N_ERR_CIPHER_NOT_SUPPORTED);
 }
 
 int s2n_set_cipher_as_sslv2_server(struct s2n_connection *conn, uint8_t *wire, uint16_t count)

@@ -21,26 +21,26 @@ int s2n_blob_set_protocol_preferences(struct s2n_blob *application_protocols, co
 {
     struct s2n_stuffer protocol_stuffer = {0};
 
-    GUARD(s2n_free(application_protocols));
+    POSIX_GUARD(s2n_free(application_protocols));
 
     if (protocols == NULL || protocol_count == 0) {
         /* NULL value indicates no preference, so nothing to do */
         return 0;
     }
 
-    GUARD(s2n_stuffer_growable_alloc(&protocol_stuffer, 256));
+    POSIX_GUARD(s2n_stuffer_growable_alloc(&protocol_stuffer, 256));
     for (int i = 0; i < protocol_count; i++) {
         size_t length = strlen(protocols[i]);
         uint8_t protocol[255];
 
         S2N_ERROR_IF(length > 255 || (s2n_stuffer_data_available(&protocol_stuffer) + length + 1) > 65535, S2N_ERR_APPLICATION_PROTOCOL_TOO_LONG);
-        memcpy_check(protocol, protocols[i], length);
-        GUARD(s2n_stuffer_write_uint8(&protocol_stuffer, length));
-        GUARD(s2n_stuffer_write_bytes(&protocol_stuffer, protocol, length));
+        POSIX_CHECKED_MEMCPY(protocol, protocols[i], length);
+        POSIX_GUARD(s2n_stuffer_write_uint8(&protocol_stuffer, length));
+        POSIX_GUARD(s2n_stuffer_write_bytes(&protocol_stuffer, protocol, length));
     }
 
-    GUARD(s2n_stuffer_extract_blob(&protocol_stuffer, application_protocols));
-    GUARD(s2n_stuffer_free(&protocol_stuffer));
+    POSIX_GUARD(s2n_stuffer_extract_blob(&protocol_stuffer, application_protocols));
+    POSIX_GUARD(s2n_stuffer_free(&protocol_stuffer));
     return 0;
 }
 

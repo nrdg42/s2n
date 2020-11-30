@@ -474,7 +474,7 @@ int main(int argc, char **argv)
 
             for (s2n_hash_algorithm hash_alg = S2N_HASH_SHA1; hash_alg <= S2N_HASH_SHA384; hash_alg++) {
                 uint8_t hash_size = 0;
-                GUARD(s2n_hash_digest_size(hash_alg, &hash_size));
+                POSIX_GUARD(s2n_hash_digest_size(hash_alg, &hash_size));
 
                 uint8_t binder_size = 0;
                 EXPECT_SUCCESS(s2n_stuffer_read_uint8(&out, &binder_size));
