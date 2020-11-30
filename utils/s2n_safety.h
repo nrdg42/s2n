@@ -24,9 +24,7 @@
 #include "error/s2n_errno.h"
 #include "utils/s2n_ensure.h"
 #include "utils/s2n_result.h"
-
-/* Success signal value for OpenSSL functions */
-#define _OSSL_SUCCESS 1
+#include "utils/s2n_safety_macros.h"
 
 /**
  * The goal of s2n_safety is to provide helpers to perform common
