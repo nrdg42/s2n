@@ -36,54 +36,54 @@
 #define _OSSL_SUCCESS 1
 
 /**
- * Sets the global `s2n_errno` and returns with an `S2N_RESULT_ERROR`
+ * Sets the global `s2n_errno` to `error` and returns with an `S2N_RESULT_ERROR`
  */
 #define RESULT_BAIL(error)                                     do { _S2N_ERROR((error)); return S2N_RESULT_ERROR; } while (0)
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` with an `error`
+ * Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` with `error`
  */
 #define RESULT_ENSURE(condition, error)                        __S2N_ENSURE((condition), RESULT_BAIL(error))
 
 /**
- * Ensures `s2n_result_is_ok(result)`, otherwise the function will `RESULT_BAIL` with an `error`
+ * Ensures `s2n_result_is_ok(result)`, otherwise the function will `RESULT_BAIL` with `error`
  *
  * This can be useful for overriding the global `s2n_errno`
  */
 #define RESULT_ENSURE_OK(result, error)                        __S2N_ENSURE(s2n_result_is_ok(result), RESULT_BAIL(error))
 
 /**
- * Ensures `a` is greater than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_GTE(a, b)                                __S2N_ENSURE((a) >= (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_LTE(a, b)                                __S2N_ENSURE((a) <= (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is greater than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_GT(a, b)                                 __S2N_ENSURE((a) > (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_LT(a, b)                                 __S2N_ENSURE((a) < (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_EQ(a, b)                                 __S2N_ENSURE((a) == (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is not equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is not equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define RESULT_ENSURE_NE(a, b)                                 __S2N_ENSURE((a) != (b), RESULT_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `min <= n <= max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min <= n <= max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY`
  */
 #define RESULT_ENSURE_INCLUSIVE_RANGE(min, n, max)              \
         do { \
@@ -95,7 +95,7 @@
         } while(0)
 
 /**
- * Ensures `min < n < max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min < n < max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY`
  */
 #define RESULT_ENSURE_EXCLUSIVE_RANGE(min, n, max)              \
         do { \
@@ -162,54 +162,54 @@
 #define RESULT_GUARD_PTR(result)                               __S2N_ENSURE((result) != NULL, return S2N_RESULT_ERROR)
 
 /**
- * Sets the global `s2n_errno` and returns with an `S2N_FAILURE`
+ * Sets the global `s2n_errno` to `error` and returns with an `S2N_FAILURE`
  */
 #define POSIX_BAIL(error)                                     do { _S2N_ERROR((error)); return S2N_FAILURE; } while (0)
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with an `error`
+ * Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with `error`
  */
 #define POSIX_ENSURE(condition, error)                        __S2N_ENSURE((condition), POSIX_BAIL(error))
 
 /**
- * Ensures `(result) >= S2N_SUCCESS`, otherwise the function will `POSIX_BAIL` with an `error`
+ * Ensures `(result) >= S2N_SUCCESS`, otherwise the function will `POSIX_BAIL` with `error`
  *
  * This can be useful for overriding the global `s2n_errno`
  */
 #define POSIX_ENSURE_OK(result, error)                        __S2N_ENSURE((result) >= S2N_SUCCESS, POSIX_BAIL(error))
 
 /**
- * Ensures `a` is greater than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_GTE(a, b)                                __S2N_ENSURE((a) >= (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_LTE(a, b)                                __S2N_ENSURE((a) <= (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is greater than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_GT(a, b)                                 __S2N_ENSURE((a) > (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_LT(a, b)                                 __S2N_ENSURE((a) < (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_EQ(a, b)                                 __S2N_ENSURE((a) == (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is not equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is not equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define POSIX_ENSURE_NE(a, b)                                 __S2N_ENSURE((a) != (b), POSIX_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `min <= n <= max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min <= n <= max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY`
  */
 #define POSIX_ENSURE_INCLUSIVE_RANGE(min, n, max)              \
         do { \
@@ -221,7 +221,7 @@
         } while(0)
 
 /**
- * Ensures `min < n < max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min < n < max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY`
  */
 #define POSIX_ENSURE_EXCLUSIVE_RANGE(min, n, max)              \
         do { \
@@ -288,54 +288,54 @@
 #define POSIX_GUARD_PTR(result)                               __S2N_ENSURE((result) != NULL, return S2N_FAILURE)
 
 /**
- * Sets the global `s2n_errno` and returns with an `NULL`
+ * Sets the global `s2n_errno` to `error` and returns with an `NULL`
  */
 #define PTR_BAIL(error)                                       do { _S2N_ERROR((error)); return NULL; } while (0)
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with an `error`
+ * Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with `error`
  */
 #define PTR_ENSURE(condition, error)                          __S2N_ENSURE((condition), PTR_BAIL(error))
 
 /**
- * Ensures `(result) != NULL`, otherwise the function will `PTR_BAIL` with an `error`
+ * Ensures `(result) != NULL`, otherwise the function will `PTR_BAIL` with `error`
  *
  * This can be useful for overriding the global `s2n_errno`
  */
 #define PTR_ENSURE_OK(result, error)                          __S2N_ENSURE((result) != NULL, PTR_BAIL(error))
 
 /**
- * Ensures `a` is greater than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_GTE(a, b)                                  __S2N_ENSURE((a) >= (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_LTE(a, b)                                  __S2N_ENSURE((a) <= (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is greater than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is greater than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_GT(a, b)                                   __S2N_ENSURE((a) > (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is less than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is less than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_LT(a, b)                                   __S2N_ENSURE((a) < (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_EQ(a, b)                                   __S2N_ENSURE((a) == (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `a` is not equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+ * Ensures `a` is not equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
  */
 #define PTR_ENSURE_NE(a, b)                                   __S2N_ENSURE((a) != (b), PTR_BAIL(S2N_ERR_SAFETY))
 
 /**
- * Ensures `min <= n <= max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min <= n <= max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY`
  */
 #define PTR_ENSURE_INCLUSIVE_RANGE(min, n, max)                \
         do { \
@@ -347,7 +347,7 @@
         } while(0)
 
 /**
- * Ensures `min < n < max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY``
+ * Ensures `min < n < max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY`
  */
 #define PTR_ENSURE_EXCLUSIVE_RANGE(min, n, max)                \
         do { \

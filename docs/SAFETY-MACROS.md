@@ -10,59 +10,59 @@
 
 ### RESULT_BAIL(error)
 
-Sets the global `s2n_errno` and returns with an `S2N_RESULT_ERROR`
+Sets the global `s2n_errno` to `error` and returns with an `S2N_RESULT_ERROR`
 
 
 ### RESULT_ENSURE(condition, error)
 
-Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` with an `error`
+Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` with `error`
 
 
 ### RESULT_ENSURE_OK(result, error)
 
-Ensures `s2n_result_is_ok(result)`, otherwise the function will `RESULT_BAIL` with an `error`
+Ensures `s2n_result_is_ok(result)`, otherwise the function will `RESULT_BAIL` with `error`
 
         This can be useful for overriding the global `s2n_errno`
 
 
 ### RESULT_ENSURE_GTE(a, b)
 
-Ensures `a` is greater than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_LTE(a, b)
 
-Ensures `a` is less than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than or equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_GT(a, b)
 
-Ensures `a` is greater than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_LT(a, b)
 
-Ensures `a` is less than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_EQ(a, b)
 
-Ensures `a` is equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_NE(a, b)
 
-Ensures `a` is not equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is not equal to `b`, otherwise the function will `RESULT_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### RESULT_ENSURE_INCLUSIVE_RANGE(min, n, max)
 
-Ensures `min <= n <= max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min <= n <= max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### RESULT_ENSURE_EXCLUSIVE_RANGE(min, n, max)
 
-Ensures `min < n < max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min < n < max`, otherwise the function will `RESULT_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### RESULT_ENSURE_REF(x)
@@ -125,59 +125,59 @@ Ensures `(result) != NULL`, otherwise the function will return `S2N_RESULT_ERROR
 
 ### POSIX_BAIL(error)
 
-Sets the global `s2n_errno` and returns with an `S2N_FAILURE`
+Sets the global `s2n_errno` to `error` and returns with an `S2N_FAILURE`
 
 
 ### POSIX_ENSURE(condition, error)
 
-Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with an `error`
+Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with `error`
 
 
 ### POSIX_ENSURE_OK(result, error)
 
-Ensures `(result) >= S2N_SUCCESS`, otherwise the function will `POSIX_BAIL` with an `error`
+Ensures `(result) >= S2N_SUCCESS`, otherwise the function will `POSIX_BAIL` with `error`
 
         This can be useful for overriding the global `s2n_errno`
 
 
 ### POSIX_ENSURE_GTE(a, b)
 
-Ensures `a` is greater than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_LTE(a, b)
 
-Ensures `a` is less than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than or equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_GT(a, b)
 
-Ensures `a` is greater than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_LT(a, b)
 
-Ensures `a` is less than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_EQ(a, b)
 
-Ensures `a` is equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_NE(a, b)
 
-Ensures `a` is not equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is not equal to `b`, otherwise the function will `POSIX_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### POSIX_ENSURE_INCLUSIVE_RANGE(min, n, max)
 
-Ensures `min <= n <= max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min <= n <= max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### POSIX_ENSURE_EXCLUSIVE_RANGE(min, n, max)
 
-Ensures `min < n < max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min < n < max`, otherwise the function will `POSIX_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### POSIX_ENSURE_REF(x)
@@ -240,59 +240,59 @@ Ensures `(result) != NULL`, otherwise the function will return `S2N_FAILURE`
 
 ### PTR_BAIL(error)
 
-Sets the global `s2n_errno` and returns with an `NULL`
+Sets the global `s2n_errno` to `error` and returns with an `NULL`
 
 
 ### PTR_ENSURE(condition, error)
 
-Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with an `error`
+Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with `error`
 
 
 ### PTR_ENSURE_OK(result, error)
 
-Ensures `(result) != NULL`, otherwise the function will `PTR_BAIL` with an `error`
+Ensures `(result) != NULL`, otherwise the function will `PTR_BAIL` with `error`
 
         This can be useful for overriding the global `s2n_errno`
 
 
 ### PTR_ENSURE_GTE(a, b)
 
-Ensures `a` is greater than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_LTE(a, b)
 
-Ensures `a` is less than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than or equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_GT(a, b)
 
-Ensures `a` is greater than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is greater than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_LT(a, b)
 
-Ensures `a` is less than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is less than `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_EQ(a, b)
 
-Ensures `a` is equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_NE(a, b)
 
-Ensures `a` is not equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error`
+Ensures `a` is not equal to `b`, otherwise the function will `PTR_BAIL` with a `S2N_ERR_SAFETY` error
 
 
 ### PTR_ENSURE_INCLUSIVE_RANGE(min, n, max)
 
-Ensures `min <= n <= max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min <= n <= max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### PTR_ENSURE_EXCLUSIVE_RANGE(min, n, max)
 
-Ensures `min < n < max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY``
+Ensures `min < n < max`, otherwise the function will `PTR_BAIL` with `S2N_ERR_SAFETY`
 
 
 ### PTR_ENSURE_REF(x)

@@ -104,7 +104,7 @@ def cmp_check(op):
 
 MACROS = {
     'BAIL(error)': dict(
-        doc  = 'Sets the global `s2n_errno` and returns with an `{error}`',
+        doc  = 'Sets the global `s2n_errno` to `error` and returns with an `{error}`',
         impl = 'do {{ _S2N_ERROR((error)); return {error}; }} while (0)',
         harness = '''
         static {ret} {bail}_harness()
@@ -118,7 +118,7 @@ MACROS = {
         ],
     ),
     'ENSURE(condition, error)': dict(
-        doc  = 'Ensures the `condition` is `true`, otherwise the function will `{bail}` with an `error`',
+        doc  = 'Ensures the `condition` is `true`, otherwise the function will `{bail}` with `error`',
         impl = '__S2N_ENSURE((condition), {bail}(error))',
         harness = '''
         static {ret} {prefix}ENSURE_harness(bool is_ok)
@@ -134,7 +134,7 @@ MACROS = {
     ),
     'ENSURE_OK(result, error)': dict(
         doc  = '''
-        Ensures `{is_ok}`, otherwise the function will `{bail}` with an `error`
+        Ensures `{is_ok}`, otherwise the function will `{bail}` with `error`
         
         This can be useful for overriding the global `s2n_errno`
         ''',
@@ -153,7 +153,7 @@ MACROS = {
     ),
     'ENSURE_GTE(a, b)': dict(
         doc  = '''
-        Ensures `a` is greater than or equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is greater than or equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('>='),
         harness = '''
@@ -184,7 +184,7 @@ MACROS = {
     ),
     'ENSURE_LTE(a, b)': dict(
         doc  = '''
-        Ensures `a` is less than or equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is less than or equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('<='),
         harness = '''
@@ -215,7 +215,7 @@ MACROS = {
     ),
     'ENSURE_GT(a, b)': dict(
         doc  = '''
-        Ensures `a` is greater than `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is greater than `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('>'),
         harness = '''
@@ -246,7 +246,7 @@ MACROS = {
     ),
     'ENSURE_LT(a, b)': dict(
         doc  = '''
-        Ensures `a` is less than `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is less than `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('<'),
         harness = '''
@@ -277,7 +277,7 @@ MACROS = {
     ),
     'ENSURE_EQ(a, b)': dict(
         doc  = '''
-        Ensures `a` is equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('=='),
         harness = '''
@@ -304,7 +304,7 @@ MACROS = {
     ),
     'ENSURE_NE(a, b)': dict(
         doc  = '''
-        Ensures `a` is not equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error`
+        Ensures `a` is not equal to `b`, otherwise the function will `{bail}` with a `S2N_ERR_SAFETY` error
         ''',
         impl = cmp_check('!='),
         harness = '''
@@ -330,7 +330,7 @@ MACROS = {
         ],
     ),
     'ENSURE_INCLUSIVE_RANGE(min, n, max)': dict(
-        doc  = 'Ensures `min <= n <= max`, otherwise the function will `{bail}` with `S2N_ERR_SAFETY``',
+        doc  = 'Ensures `min <= n <= max`, otherwise the function will `{bail}` with `S2N_ERR_SAFETY`',
         impl = ''' \\
         do {{ \\
             __typeof(n) __tmp_n = ( n ); \\
@@ -365,7 +365,7 @@ MACROS = {
         ],
     ),
     'ENSURE_EXCLUSIVE_RANGE(min, n, max)': dict(
-        doc  = 'Ensures `min < n < max`, otherwise the function will `{bail}` with `S2N_ERR_SAFETY``',
+        doc  = 'Ensures `min < n < max`, otherwise the function will `{bail}` with `S2N_ERR_SAFETY`',
         impl = ''' \\
         do {{ \\
             __typeof(n) __tmp_n = ( n ); \\
