@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "s2n_annotations.h"
+#include "utils/s2n_annotations.h"
 #include "utils/s2n_safety.h"
 
 /**

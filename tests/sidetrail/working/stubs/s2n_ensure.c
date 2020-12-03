@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-#include "s2n_annotations.h"
+#include "utils/s2n_annotations.h"
 #include "utils/s2n_safety.h"
 #include "sidetrail.h"
 

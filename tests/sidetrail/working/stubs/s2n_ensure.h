@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "s2n_annotations.h"
+#include "utils/s2n_annotations.h"
 #include "sidetrail.h"
 
 void __VERIFIER_assume(int);
