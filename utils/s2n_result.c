@@ -78,7 +78,7 @@
 
 #include <s2n.h>
 #include <stdbool.h>
-#include "s2n_result.h"
+#include "utils/s2n_result.h"
 
 /* returns true when the result is S2N_RESULT_OK */
 bool s2n_result_is_ok(s2n_result result)
