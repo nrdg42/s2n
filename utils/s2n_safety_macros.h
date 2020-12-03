@@ -127,12 +127,31 @@
 #define RESULT_POSTCONDITION(condition)                        __S2N_ENSURE_CONDITION((condition), RESULT_BAIL(S2N_ERR_POSTCONDITION_VIOLATION))
 
 /**
- * Performs a safe memcpy
+ * Performs a safer memcpy.
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ * * `source` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by both the `destination` and `source` parameters,
+ *   shall be at least `len` bytes.
  */
 #define RESULT_CHECKED_MEMCPY(destination, source, len)        __S2N_ENSURE_SAFE_MEMCPY((destination), (source), (len), RESULT_GUARD_PTR)
 
 /**
- * Performs a safe memset
+ * Performs a safer memset
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by the `destination` parameter shall be at least
+ *   `len` bytes.
  */
 #define RESULT_CHECKED_MEMSET(destination, value, len)         __S2N_ENSURE_SAFE_MEMSET((destination), (value), (len), RESULT_ENSURE_REF)
 
@@ -253,12 +272,31 @@
 #define POSIX_POSTCONDITION(condition)                        __S2N_ENSURE_CONDITION((condition), POSIX_BAIL(S2N_ERR_POSTCONDITION_VIOLATION))
 
 /**
- * Performs a safe memcpy
+ * Performs a safer memcpy.
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ * * `source` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by both the `destination` and `source` parameters,
+ *   shall be at least `len` bytes.
  */
 #define POSIX_CHECKED_MEMCPY(destination, source, len)        __S2N_ENSURE_SAFE_MEMCPY((destination), (source), (len), POSIX_GUARD_PTR)
 
 /**
- * Performs a safe memset
+ * Performs a safer memset
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by the `destination` parameter shall be at least
+ *   `len` bytes.
  */
 #define POSIX_CHECKED_MEMSET(destination, value, len)         __S2N_ENSURE_SAFE_MEMSET((destination), (value), (len), POSIX_ENSURE_REF)
 
@@ -379,12 +417,31 @@
 #define PTR_POSTCONDITION(condition)                          __S2N_ENSURE_CONDITION((condition), PTR_BAIL(S2N_ERR_POSTCONDITION_VIOLATION))
 
 /**
- * Performs a safe memcpy
+ * Performs a safer memcpy.
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ * * `source` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by both the `destination` and `source` parameters,
+ *   shall be at least `len` bytes.
  */
 #define PTR_CHECKED_MEMCPY(destination, source, len)          __S2N_ENSURE_SAFE_MEMCPY((destination), (source), (len), PTR_GUARD_PTR)
 
 /**
- * Performs a safe memset
+ * Performs a safer memset
+ *
+ * The following checks are performed:
+ *
+ * * `destination` is non-null
+ *
+ * Callers will still need to ensure the following:
+ *
+ * * The size of the data pointed to by the `destination` parameter shall be at least
+ *   `len` bytes.
  */
 #define PTR_CHECKED_MEMSET(destination, value, len)           __S2N_ENSURE_SAFE_MEMSET((destination), (value), (len), PTR_ENSURE_REF)
 

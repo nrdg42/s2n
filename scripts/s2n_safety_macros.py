@@ -468,7 +468,19 @@ MACROS = {
         ],
     ),
     'CHECKED_MEMCPY(destination, source, len)': dict(
-        doc  = 'Performs a safe memcpy',
+        doc  = '''
+        Performs a safer memcpy.
+
+        The following checks are performed:
+
+        * `destination` is non-null
+        * `source` is non-null
+
+        Callers will still need to ensure the following:
+
+        * The size of the data pointed to by both the `destination` and `source` parameters,
+          shall be at least `len` bytes.
+        ''',
         impl = '__S2N_ENSURE_SAFE_MEMCPY((destination), (source), (len), {prefix}GUARD_PTR)',
         harness = '''
         static {ret} {prefix}CHECKED_MEMCPY_harness(uint32_t* dest, uint32_t* source, size_t len)
@@ -489,7 +501,18 @@ MACROS = {
         ],
     ),
     'CHECKED_MEMSET(destination, value, len)': dict(
-        doc  = 'Performs a safe memset',
+        doc  = '''
+        Performs a safer memset
+
+        The following checks are performed:
+
+        * `destination` is non-null
+
+        Callers will still need to ensure the following:
+
+        * The size of the data pointed to by the `destination` parameter shall be at least
+          `len` bytes.
+        ''',
         impl = '__S2N_ENSURE_SAFE_MEMSET((destination), (value), (len), {prefix}ENSURE_REF)',
         harness = '''
         static {ret} {prefix}CHECKED_MEMSET_harness(uint32_t* dest, uint8_t value, size_t len)
@@ -548,10 +571,9 @@ def push_macro(args):
     h += '/**\n'
 
     for line in args['doc'].split('\n'):
-        line = line.strip()
         h += ' *'
         if len(line) > 0:
-            h += ' ' + line.strip()
+            h += ' ' + line
         h += '\n'
 
     h += ' */\n'
@@ -588,7 +610,7 @@ docs = """
 checks = []
 
 def push_doc(args):
-    args['doc'] = textwrap.dedent(args['doc'].strip()).format_map(args)
+    args['doc'] = textwrap.dedent(args['doc']).format_map(args).strip()
 
     return textwrap.dedent("""
     ### {prefix}{macro}

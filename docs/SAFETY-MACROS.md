@@ -22,7 +22,7 @@ Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` wit
 
 Ensures `s2n_result_is_ok(result)`, otherwise the function will `RESULT_BAIL` with `error`
 
-        This can be useful for overriding the global `s2n_errno`
+This can be useful for overriding the global `s2n_errno`
 
 
 ### RESULT_ENSURE_GTE(a, b)
@@ -87,12 +87,31 @@ Ensures the `condition` is `true`, otherwise the function will `RESULT_BAIL` wit
 
 ### RESULT_CHECKED_MEMCPY(destination, source, len)
 
-Performs a safe memcpy
+Performs a safer memcpy.
+
+The following checks are performed:
+
+* `destination` is non-null
+* `source` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by both the `destination` and `source` parameters,
+  shall be at least `len` bytes.
 
 
 ### RESULT_CHECKED_MEMSET(destination, value, len)
 
-Performs a safe memset
+Performs a safer memset
+
+The following checks are performed:
+
+* `destination` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by the `destination` parameter shall be at least
+  `len` bytes.
 
 
 ### RESULT_GUARD(result)
@@ -137,7 +156,7 @@ Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with
 
 Ensures `(result) >= S2N_SUCCESS`, otherwise the function will `POSIX_BAIL` with `error`
 
-        This can be useful for overriding the global `s2n_errno`
+This can be useful for overriding the global `s2n_errno`
 
 
 ### POSIX_ENSURE_GTE(a, b)
@@ -202,12 +221,31 @@ Ensures the `condition` is `true`, otherwise the function will `POSIX_BAIL` with
 
 ### POSIX_CHECKED_MEMCPY(destination, source, len)
 
-Performs a safe memcpy
+Performs a safer memcpy.
+
+The following checks are performed:
+
+* `destination` is non-null
+* `source` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by both the `destination` and `source` parameters,
+  shall be at least `len` bytes.
 
 
 ### POSIX_CHECKED_MEMSET(destination, value, len)
 
-Performs a safe memset
+Performs a safer memset
+
+The following checks are performed:
+
+* `destination` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by the `destination` parameter shall be at least
+  `len` bytes.
 
 
 ### POSIX_GUARD(result)
@@ -252,7 +290,7 @@ Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with `
 
 Ensures `(result) != NULL`, otherwise the function will `PTR_BAIL` with `error`
 
-        This can be useful for overriding the global `s2n_errno`
+This can be useful for overriding the global `s2n_errno`
 
 
 ### PTR_ENSURE_GTE(a, b)
@@ -317,12 +355,31 @@ Ensures the `condition` is `true`, otherwise the function will `PTR_BAIL` with a
 
 ### PTR_CHECKED_MEMCPY(destination, source, len)
 
-Performs a safe memcpy
+Performs a safer memcpy.
+
+The following checks are performed:
+
+* `destination` is non-null
+* `source` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by both the `destination` and `source` parameters,
+  shall be at least `len` bytes.
 
 
 ### PTR_CHECKED_MEMSET(destination, value, len)
 
-Performs a safe memset
+Performs a safer memset
+
+The following checks are performed:
+
+* `destination` is non-null
+
+Callers will still need to ensure the following:
+
+* The size of the data pointed to by the `destination` parameter shall be at least
+  `len` bytes.
 
 
 ### PTR_GUARD(result)
