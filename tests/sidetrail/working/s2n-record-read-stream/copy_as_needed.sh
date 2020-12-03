@@ -47,11 +47,9 @@ patch -p5 < ../patches/cbc.patch
 
 mkdir -p utils
 cp $S2N_BASE/utils/s2n_safety.c utils/
-cp $S2N_BASE/utils/s2n_safety.h utils/
-cp $S2N_BASE/utils/s2n_safety_macros.h utils/
-cp ../stubs/s2n_mem.c utils/
 patch -p1 < ../patches/safety.patch
 
 cp ../stubs/s2n_annotations.h utils/
 cp ../stubs/s2n_ensure.h utils/
 cp ../stubs/s2n_ensure.c utils/
+cp ../stubs/s2n_mem.c utils/
