@@ -63,7 +63,7 @@ int s2n_client_cert_verify_send(struct s2n_connection *conn)
 
     struct s2n_signature_scheme chosen_sig_scheme = s2n_rsa_pkcs1_md5_sha1;
 
-    if(conn->actual_protocol_version >= S2N_TLS12){
+    if (conn->actual_protocol_version >= S2N_TLS12) {
         chosen_sig_scheme =  conn->secure.client_cert_sig_scheme;
         POSIX_GUARD(s2n_stuffer_write_uint16(out, conn->secure.client_cert_sig_scheme.iana_value));
     }
@@ -74,13 +74,18 @@ int s2n_client_cert_verify_send(struct s2n_connection *conn)
     POSIX_GUARD(s2n_hash_copy(&conn->handshake.ccv_hash_copy, &hash_state));
 
     struct s2n_cert_chain_and_key *cert_chain_and_key = conn->handshake_params.our_chain_and_key;
+
     struct s2n_blob signature = {0};
     signature.size = s2n_pkey_size(cert_chain_and_key->private_key);
     POSIX_GUARD(s2n_stuffer_write_uint16(out, signature.size));
     signature.data = s2n_stuffer_raw_write(out, signature.size);
     POSIX_ENSURE_REF(signature.data);
 
+
     POSIX_GUARD(s2n_pkey_sign(cert_chain_and_key->private_key, chosen_sig_scheme.sig_alg, &conn->handshake.ccv_hash_copy, &signature));
+
+    GUARD(s2n_stuffer_write_uint16(out, signature.size));
+    GUARD(s2n_stuffer_write(out, &signature));
 
     /* Client certificate has been verified. Minimize required handshake hash algs */
     POSIX_GUARD(s2n_conn_update_required_handshake_hashes(conn));
