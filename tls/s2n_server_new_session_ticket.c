@@ -31,15 +31,15 @@
 #include "utils/s2n_random.h"
 
 int s2n_server_nst_recv(struct s2n_connection *conn) {
-    GUARD(s2n_stuffer_read_uint32(&conn->handshake.io, &conn->ticket_lifetime_hint));
+    POSIX_GUARD(s2n_stuffer_read_uint32(&conn->handshake.io, &conn->ticket_lifetime_hint));
 
     uint16_t session_ticket_len;
-    GUARD(s2n_stuffer_read_uint16(&conn->handshake.io, &session_ticket_len));
+    POSIX_GUARD(s2n_stuffer_read_uint16(&conn->handshake.io, &session_ticket_len));
 
     if (session_ticket_len > 0) {
-        GUARD(s2n_realloc(&conn->client_ticket, session_ticket_len));
+        POSIX_GUARD(s2n_realloc(&conn->client_ticket, session_ticket_len));
 
-        GUARD(s2n_stuffer_read(&conn->handshake.io, &conn->client_ticket));
+        POSIX_GUARD(s2n_stuffer_read(&conn->handshake.io, &conn->client_ticket));
     }
 
     return 0;
@@ -55,22 +55,22 @@ int s2n_server_nst_send(struct s2n_connection *conn)
 
     /* When server changes it's mind mid handshake send lifetime hint and session ticket length as zero */
     if (!conn->config->use_tickets) {
-        GUARD(s2n_stuffer_write_uint32(&conn->handshake.io, 0));
-        GUARD(s2n_stuffer_write_uint16(&conn->handshake.io, 0));
+        POSIX_GUARD(s2n_stuffer_write_uint32(&conn->handshake.io, 0));
+        POSIX_GUARD(s2n_stuffer_write_uint16(&conn->handshake.io, 0));
 
         return 0;
     }
 
     if (!s2n_server_sending_nst(conn)) {
-        S2N_ERROR(S2N_ERR_SENDING_NST);
+        POSIX_BAIL(S2N_ERR_SENDING_NST);
     }
 
-    GUARD(s2n_stuffer_init(&to, &entry));
-    GUARD(s2n_stuffer_write_uint32(&conn->handshake.io, lifetime_hint_in_secs));
-    GUARD(s2n_stuffer_write_uint16(&conn->handshake.io, session_ticket_len));
+    POSIX_GUARD(s2n_stuffer_init(&to, &entry));
+    POSIX_GUARD(s2n_stuffer_write_uint32(&conn->handshake.io, lifetime_hint_in_secs));
+    POSIX_GUARD(s2n_stuffer_write_uint16(&conn->handshake.io, session_ticket_len));
 
-    GUARD(s2n_encrypt_session_ticket(conn, &to));
-    GUARD(s2n_stuffer_write(&conn->handshake.io, &to.blob));
+    POSIX_GUARD(s2n_encrypt_session_ticket(conn, &to));
+    POSIX_GUARD(s2n_stuffer_write(&conn->handshake.io, &to.blob));
 
     return 0;
 }

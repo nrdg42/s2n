@@ -37,45 +37,45 @@ bool s2n_blob_is_valid(const struct s2n_blob* b)
 
 int s2n_blob_init(struct s2n_blob *b, uint8_t * data, uint32_t size)
 {
-    notnull_check(b);
-    PRECONDITION_POSIX(S2N_MEM_IS_READABLE(data,size));
+    POSIX_ENSURE_REF(b);
+    POSIX_PRECONDITION(S2N_MEM_IS_READABLE(data,size));
     *b = (struct s2n_blob) {.data = data, .size = size, .allocated = 0, .growable = 0};
-    POSTCONDITION_POSIX(s2n_blob_is_valid(b));
+    POSIX_POSTCONDITION(s2n_blob_is_valid(b));
     return S2N_SUCCESS;
 }
 
 int s2n_blob_zero(struct s2n_blob *b)
 {
-    PRECONDITION_POSIX(s2n_blob_is_valid(b));
-    memset_check(b->data, 0, MAX(b->allocated, b->size));
-    POSTCONDITION_POSIX(s2n_blob_is_valid(b));
+    POSIX_PRECONDITION(s2n_blob_is_valid(b));
+    POSIX_CHECKED_MEMSET(b->data, 0, MAX(b->allocated, b->size));
+    POSIX_POSTCONDITION(s2n_blob_is_valid(b));
     return S2N_SUCCESS;
 }
 
 int s2n_blob_slice(const struct s2n_blob *b, struct s2n_blob *slice, uint32_t offset, uint32_t size)
 {
-    PRECONDITION_POSIX(s2n_blob_is_valid(b));
-    PRECONDITION_POSIX(s2n_blob_is_valid(slice));
+    POSIX_PRECONDITION(s2n_blob_is_valid(b));
+    POSIX_PRECONDITION(s2n_blob_is_valid(slice));
 
     uint32_t slice_size = 0;
-    GUARD(s2n_add_overflow(offset, size, &slice_size));
-    ENSURE_POSIX(b->size >= slice_size, S2N_ERR_SIZE_MISMATCH);
+    POSIX_GUARD(s2n_add_overflow(offset, size, &slice_size));
+    POSIX_ENSURE(b->size >= slice_size, S2N_ERR_SIZE_MISMATCH);
     slice->data = b->data + offset;
     slice->size = size;
     slice->growable = 0;
     slice->allocated = 0;
 
-    POSTCONDITION_POSIX(s2n_blob_is_valid(slice));
+    POSIX_POSTCONDITION(s2n_blob_is_valid(slice));
     return S2N_SUCCESS;
 }
 
 int s2n_blob_char_to_lower(struct s2n_blob *b)
 {
-    PRECONDITION_POSIX(s2n_blob_is_valid(b));
+    POSIX_PRECONDITION(s2n_blob_is_valid(b));
     for (size_t i = 0; i < b->size; i++) {
         b->data[i] = tolower(b->data[i]);
     }
-    POSTCONDITION_POSIX(s2n_blob_is_valid(b));
+    POSIX_POSTCONDITION(s2n_blob_is_valid(b));
     return S2N_SUCCESS;
 }
 
@@ -104,11 +104,11 @@ static const uint8_t hex_inverse[256] = {
  * string needs to a valid hex and blob needs to be large enough */
 int s2n_hex_string_to_bytes(const uint8_t *str, struct s2n_blob *blob)
 {
-    notnull_check(str);
-    PRECONDITION_POSIX(s2n_blob_is_valid(blob));
+    POSIX_ENSURE_REF(str);
+    POSIX_PRECONDITION(s2n_blob_is_valid(blob));
     uint32_t len = strlen((const char*)str);
     /* protects against overflows */
-    gte_check(blob->size, len / 2);
+    POSIX_ENSURE_GTE(blob->size, len / 2);
     S2N_ERROR_IF(len % 2 != 0, S2N_ERR_INVALID_HEX);
 
     for (size_t i = 0; i < len; i += 2) {
@@ -120,6 +120,6 @@ int s2n_hex_string_to_bytes(const uint8_t *str, struct s2n_blob *blob)
         blob->data[i / 2] = high_nibble << 4 | low_nibble;
     }
 
-    POSTCONDITION_POSIX(s2n_blob_is_valid(blob));
+    POSIX_POSTCONDITION(s2n_blob_is_valid(blob));
     return S2N_SUCCESS;
 }

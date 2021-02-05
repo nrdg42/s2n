@@ -38,9 +38,9 @@ static int s2n_rsa_modulus_check(RSA *rsa)
         const BIGNUM *n = NULL;
         /* RSA still owns the memory for n */
         RSA_get0_key(rsa, &n, NULL, NULL);
-        notnull_check(n);
+        POSIX_ENSURE_REF(n);
     #else
-        notnull_check(rsa->n);
+        POSIX_ENSURE_REF(rsa->n);
     #endif
     return 0;
 }
@@ -48,8 +48,8 @@ static int s2n_rsa_modulus_check(RSA *rsa)
 static int s2n_rsa_encrypted_size(const struct s2n_pkey *key)
 {
     const struct s2n_rsa_key *rsa_key = &key->key.rsa_key;
-    notnull_check(rsa_key->rsa);
-    GUARD(s2n_rsa_modulus_check(rsa_key->rsa));
+    POSIX_ENSURE_REF(rsa_key->rsa);
+    POSIX_GUARD(s2n_rsa_modulus_check(rsa_key->rsa));
 
     return RSA_size(rsa_key->rsa);
 }
@@ -63,7 +63,7 @@ static int s2n_rsa_sign(const struct s2n_pkey *priv, s2n_signature_algorithm sig
         case S2N_SIGNATURE_RSA_PSS_RSAE:
             return s2n_rsa_pss_sign(priv, digest, signature);
         default:
-            S2N_ERROR(S2N_ERR_INVALID_SIGNATURE_ALGORITHM);
+            POSIX_BAIL(S2N_ERR_INVALID_SIGNATURE_ALGORITHM);
     }
 
     return S2N_SUCCESS;
@@ -78,7 +78,7 @@ static int s2n_rsa_verify(const struct s2n_pkey *pub, s2n_signature_algorithm si
         case S2N_SIGNATURE_RSA_PSS_RSAE:
             return s2n_rsa_pss_verify(pub, digest, signature);
         default:
-            S2N_ERROR(S2N_ERR_INVALID_SIGNATURE_ALGORITHM);
+            POSIX_BAIL(S2N_ERR_INVALID_SIGNATURE_ALGORITHM);
     }
 
     return S2N_SUCCESS;
@@ -100,11 +100,11 @@ static int s2n_rsa_decrypt(const struct s2n_pkey *priv, struct s2n_blob *in, str
     unsigned char intermediate[4096];
     const int expected_size = s2n_rsa_encrypted_size(priv);
 
-    GUARD(expected_size);
+    POSIX_GUARD(expected_size);
     S2N_ERROR_IF(expected_size > sizeof(intermediate), S2N_ERR_NOMEM);
     S2N_ERROR_IF(out->size > sizeof(intermediate), S2N_ERR_NOMEM);
 
-    GUARD_AS_POSIX(s2n_get_public_random_data(out));
+    POSIX_GUARD_RESULT(s2n_get_public_random_data(out));
 
     const s2n_rsa_private_key *key = &priv->key.rsa_key;
     int r = RSA_private_decrypt(in->size, (unsigned char *)in->data, intermediate, key->rsa, RSA_NO_PADDING);
@@ -125,12 +125,12 @@ static int s2n_rsa_keys_match(const struct s2n_pkey *pub, const struct s2n_pkey 
 
     enc.data = encpad;
     enc.size = s2n_rsa_encrypted_size(pub);
-    lte_check(enc.size, sizeof(encpad));
-    GUARD(s2n_rsa_encrypt(pub, &plain_in, &enc));
+    POSIX_ENSURE_LTE(enc.size, sizeof(encpad));
+    POSIX_GUARD(s2n_rsa_encrypt(pub, &plain_in, &enc));
 
     plain_out.data = plain_outpad;
     plain_out.size = sizeof(plain_outpad);
-    GUARD(s2n_rsa_decrypt(priv, &enc, &plain_out));
+    POSIX_GUARD(s2n_rsa_decrypt(priv, &enc, &plain_out));
 
     S2N_ERROR_IF(memcmp(plain_in.data, plain_out.data, plain_in.size), S2N_ERR_KEY_MISMATCH);
 
@@ -153,7 +153,7 @@ static int s2n_rsa_key_free(struct s2n_pkey *pkey)
 static int s2n_rsa_check_key_exists(const struct s2n_pkey *pkey)
 {
     const struct s2n_rsa_key *rsa_key = &pkey->key.rsa_key;
-    notnull_check(rsa_key->rsa);
+    POSIX_ENSURE_REF(rsa_key->rsa);
     return 0;
 }
 

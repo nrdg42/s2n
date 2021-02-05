@@ -30,14 +30,14 @@
 static struct s2n_kem_params kem_params = { .kem = &s2n_bike1_l1_r1 };
 
 int s2n_fuzz_init(int *argc, char **argv[]) {
-    GUARD(s2n_kem_recv_ciphertext_fuzz_test_init(KAT_FILE_NAME, &kem_params));
+    POSIX_GUARD(s2n_kem_recv_ciphertext_fuzz_test_init(KAT_FILE_NAME, &kem_params));
     return S2N_SUCCESS;
 }
 
 int s2n_fuzz_test(const uint8_t *buf, size_t len) {
     struct s2n_stuffer ciphertext = { 0 };
-    GUARD(s2n_stuffer_growable_alloc(&ciphertext, 8192));
-    GUARD(s2n_stuffer_write_bytes(&ciphertext, buf, len));
+    POSIX_GUARD(s2n_stuffer_growable_alloc(&ciphertext, 8192));
+    POSIX_GUARD(s2n_stuffer_write_bytes(&ciphertext, buf, len));
 
     /* We do not GUARD s2n_kem_recv_ciphertext; it will likely fail. */
     s2n_kem_recv_ciphertext(&ciphertext, &kem_params);
@@ -48,9 +48,9 @@ int s2n_fuzz_test(const uint8_t *buf, size_t len) {
     kem_params.kem->decapsulate(ss_buf, ciphertext.blob.data, kem_params.private_key.data);
 
     /* Clean up */
-    GUARD(s2n_stuffer_free(&ciphertext));
+    POSIX_GUARD(s2n_stuffer_free(&ciphertext));
     if (kem_params.shared_secret.allocated) {
-        GUARD(s2n_free(&kem_params.shared_secret));
+        POSIX_GUARD(s2n_free(&kem_params.shared_secret));
     }
 
     return S2N_SUCCESS;
