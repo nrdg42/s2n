@@ -18,7 +18,6 @@
 #include <cbmc_proof/proof_allocators.h>
 #include <string.h>
 
-#include "api/s2n.h"
 #include "error/s2n_errno.h"
 #include "utils/s2n_blob.h"
 
@@ -26,7 +25,7 @@ void s2n_hex_string_to_bytes_harness()
 {
     /* Non-deterministic inputs. */
     struct s2n_blob *blob = cbmc_allocate_s2n_blob();
-    __CPROVER_assume(s2n_blob_is_valid(blob));
+    __CPROVER_assume(s2n_result_is_ok(s2n_blob_validate(blob)));
     char *str = ensure_c_str_is_allocated(MAX_STRING_LEN);
 
     /* Save previous state. */
@@ -44,5 +43,5 @@ void s2n_hex_string_to_bytes_harness()
         assert(blob->growable == old_blob.growable);
         assert(blob->size == old_blob.size);
     }
-    assert(s2n_blob_is_valid(blob));
+    assert(s2n_result_is_ok(s2n_blob_validate(blob)));
 }

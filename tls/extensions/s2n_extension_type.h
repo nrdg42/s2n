@@ -22,6 +22,7 @@
 
 #define S2N_EXTENSION_TYPE_FIELD_LENGTH     2
 #define S2N_EXTENSION_LENGTH_FIELD_LENGTH   2
+#define S2N_EXTENSION_HEADER_LENGTH         (S2N_EXTENSION_TYPE_FIELD_LENGTH + S2N_EXTENSION_LENGTH_FIELD_LENGTH)
 
 /* The number of extensions supported by S2N */
 #define S2N_SUPPORTED_EXTENSIONS_COUNT          (sizeof(s2n_supported_extensions) / sizeof(s2n_supported_extensions[0]))
@@ -61,6 +62,7 @@ static const uint16_t s2n_supported_extensions[] = {
     TLS_EXTENSION_KEY_SHARE,
     TLS_EXTENSION_COOKIE,
     TLS_QUIC_TRANSPORT_PARAMETERS,
+    TLS_EXTENSION_PSK_KEY_EXCHANGE_MODES,
     TLS_EXTENSION_PRE_SHARED_KEY,
 };
 

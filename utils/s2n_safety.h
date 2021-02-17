@@ -144,24 +144,38 @@
   } while(0)
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `BAIL` with a `S2N_ERR_PRECONDITION_VIOLATION` error
+ * Ensures the `result` is `S2N_RESULT_OK`, otherwise the function will return an error signal
  */
-#define PRECONDITION( condition )                   __S2N_ENSURE_CONDITION((condition), BAIL(S2N_ERR_PRECONDITION_VIOLATION))
+#define PRECONDITION( result )                      GUARD_RESULT(__S2N_ENSURE_PRECONDITION(result))
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `BAIL` with a `S2N_ERR_POSTCONDITION_VIOLATION` error
+ * Ensures the `result` is `S2N_RESULT_OK`, otherwise the function will return an error signal
  */
-#define POSTCONDITION( condition )                  __S2N_ENSURE_CONDITION((condition), BAIL(S2N_ERR_POSTCONDITION_VIOLATION))
+#define POSTCONDITION( result )                     GUARD_RESULT(__S2N_ENSURE_POSTCONDITION(result))
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `BAIL_POSIX` with a `S2N_ERR_PRECONDITION_VIOLATION` error
+ * Ensures the `result` is `S2N_RESULT_OK`, otherwise the function will return an error signal
  */
-#define PRECONDITION_POSIX( condition )             __S2N_ENSURE_CONDITION((condition), BAIL_POSIX(S2N_ERR_PRECONDITION_VIOLATION))
+#define PRECONDITION_POSIX( result )                GUARD_AS_POSIX(__S2N_ENSURE_PRECONDITION(result))
 
 /**
- * Ensures the `condition` is `true`, otherwise the function will `BAIL_POSIX` with a `S2N_ERR_POSTCONDITION_VIOLATION` error
+ * Ensures the `result` is `S2N_RESULT_OK`, otherwise the function will return an error signal
  */
-#define POSTCONDITION_POSIX( condition )            __S2N_ENSURE_CONDITION((condition), BAIL_POSIX(S2N_ERR_POSTCONDITION_VIOLATION))
+#define POSTCONDITION_POSIX( result )               GUARD_AS_POSIX(__S2N_ENSURE_POSTCONDITION(result))
+
+/**
+ * Ensures the `condition` is `true`, otherwise the function will `BAIL` with an `error`.
+ * When the code is built in debug mode, they are checked.
+ * When the code is built in production mode, they are ignored.
+ */
+#define DEBUG_ENSURE( condition, error )            __S2N_ENSURE_DEBUG((condition), BAIL(error))
+
+/**
+ * Ensures the `condition` is `true`, otherwise the function will `BAIL_POSIX` with an `error`.
+ * When the code is built in debug mode, they are checked.
+ * When the code is built in production mode, they are ignored.
+ */
+#define DEBUG_ENSURE_POSIX( condition, error )      __S2N_ENSURE_DEBUG((condition), BAIL_POSIX(error))
 
 /**
  * Ensures `x` is not an error, otherwise the function will return an error signal
@@ -292,7 +306,7 @@
 /**
  * Marks a case of a switch statement as able to fall through to the next case
  */
-#if (defined(__clang__) && __clang_major__ >= 10) || (defined(__GNUC__) && __GNUC__ >= 7)
+#if defined(S2N_FALL_THROUGH_SUPPORTED)
 #    define FALL_THROUGH __attribute__((fallthrough))
 #else
 #    define FALL_THROUGH ((void)0)
@@ -331,6 +345,15 @@ extern int s2n_constant_time_pkcs1_unpad_or_dont(uint8_t * dst, const uint8_t * 
  */
 #define DEFER_CLEANUP(_thealloc, _thecleanup) \
    __attribute__((cleanup(_thecleanup))) _thealloc
+/**
+ * Often we want to free memory on an error, but not on a success.
+ * We do this by declaring a variable with DEFER_CLEANUP, then zeroing
+ * that variable after success to prevent DEFER_CLEANUP from accessing
+ * and freeing any memory it allocated.
+ *
+ * This pattern is not intuitive, so a named macro makes it more readable.
+ */
+#define ZERO_TO_DISABLE_DEFER_CLEANUP(_thealloc) memset(&_thealloc, 0, sizeof(_thealloc))
 
 /* Creates cleanup function for pointers from function func which accepts a pointer.
  * This is useful for DEFER_CLEANUP as it passes &_thealloc into _thecleanup function,

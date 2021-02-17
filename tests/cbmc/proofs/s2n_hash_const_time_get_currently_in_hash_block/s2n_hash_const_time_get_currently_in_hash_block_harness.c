@@ -13,7 +13,6 @@
  * permissions and limitations under the License.
  */
 
-#include "api/s2n.h"
 #include "crypto/s2n_hash.h"
 
 #include <cbmc_proof/make_common_datastructures.h>
@@ -27,7 +26,7 @@ void s2n_hash_const_time_get_currently_in_hash_block_harness()
     uint64_t* out = bounded_malloc(size);
 
     /* Assumptions. */
-    __CPROVER_assume(s2n_hash_state_is_valid(state));
+    __CPROVER_assume(s2n_result_is_ok(s2n_hash_state_validate(state)));
     if (state != NULL)
     {
         __CPROVER_file_local_s2n_hash_c_s2n_hash_set_impl(state);
@@ -37,7 +36,7 @@ void s2n_hash_const_time_get_currently_in_hash_block_harness()
     if (s2n_hash_const_time_get_currently_in_hash_block(state, out) == S2N_SUCCESS)
     {
         /* Post-conditions. */
-        assert(s2n_hash_state_is_valid(state));
+        assert(s2n_result_is_ok(s2n_hash_state_validate(state)));
         assert(state->is_ready_for_input);
         uint64_t hash_block_size = 0;
         s2n_hash_block_size(state->alg, &hash_block_size);

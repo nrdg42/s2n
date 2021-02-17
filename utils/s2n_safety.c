@@ -22,8 +22,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "s2n_annotations.h"
-#include "s2n_safety.h"
+#include "utils/s2n_annotations.h"
+#include "utils/s2n_safety.h"
 
 /**
  * Get the process id
@@ -60,6 +60,8 @@ bool s2n_constant_time_equals(const uint8_t * a, const uint8_t * b, const uint32
     S2N_PUBLIC_INPUT(a);
     S2N_PUBLIC_INPUT(b);
     S2N_PUBLIC_INPUT(len);
+    ENSURE_POSIX((a == NULL) || S2N_MEM_IS_READABLE(a, len), S2N_ERR_SAFETY);
+    ENSURE_POSIX((b == NULL) || S2N_MEM_IS_READABLE(b, len), S2N_ERR_SAFETY);
 
     if (len != 0 && (a == NULL || b == NULL)) {
         return false;
@@ -69,7 +71,7 @@ bool s2n_constant_time_equals(const uint8_t * a, const uint8_t * b, const uint32
     for (int i = 0; i < len; i++) {
         /* Invariants must hold for each execution of the loop
 	 * and at loop exit, hence the <= */
-        S2N_INVARIENT(i <= len);
+        S2N_INVARIANT(i <= len);
         xor |= a[i] ^ b[i];
     }
 
@@ -194,7 +196,7 @@ int s2n_in_unit_test_set(bool newval)
 int s2n_align_to(uint32_t initial, uint32_t alignment, uint32_t* out)
 {
     notnull_check(out);
-    PRECONDITION_POSIX(alignment != 0);
+    ENSURE_POSIX(alignment != 0, S2N_ERR_SAFETY);
     if (initial == 0) {
         *out = 0;
         return S2N_SUCCESS;

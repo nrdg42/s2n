@@ -103,6 +103,10 @@ int main(int argc, char **argv)
         "dce71df4deda4ab42c309572cb7fffee5454b78f07"
         "18");
 
+    S2N_BLOB_FROM_HEX(client_finished, 
+        "14000020a8ec436d677634ae525ac"
+        "1fcebe11a039ec17694fac6e98527b642f2edd5ce61");
+
     S2N_BLOB_FROM_HEX(expect_server_finished_verify,
         "9b9b141d906337fbd2cbdce71df4"
         "deda4ab42c309572cb7fffee5454b78f0718");
@@ -138,6 +142,16 @@ int main(int argc, char **argv)
         "a11af9f05531f856ad47116b45a9"
         "50328204b4f44bfb6b3a4b4f1f3fcb631643");
 
+    S2N_BLOB_FROM_HEX(expect_derived_master_resumption_secret, 
+        "7df235f2031d2a051287d02b0241"
+        "b0bfdaf86cc856231f2d5aba46c434ec196c");
+    
+    S2N_BLOB_FROM_HEX(ticket_nonce, "0000");
+
+    S2N_BLOB_FROM_HEX(expected_session_ticket_secret, 
+        "4ecd0eb6ec3b4d87f5d6028f922c"
+        "a4c5851a277fd41311c9e62d2c9492e1c4f3");
+
     S2N_BLOB_FROM_HEX(expect_handshake_traffic_server_key,
         "3fce516009c21727d0f2e4e86ee403bc");
 
@@ -149,8 +163,8 @@ int main(int argc, char **argv)
         "d6b43f2ca3e6e95f02ed063cf0e1cad8");
 
     /* KeyUpdate Vectors from Openssl s_client implementation of KeyUpdate. The ciphersuite
-      * that produced this secret was s2n_tls13_aes_256_gcm_sha384.
-      */
+     * that produced this secret was s2n_tls13_aes_256_gcm_sha384.
+     */
 
     S2N_BLOB_FROM_HEX(application_secret,
         "4bc28934ddd802b00f479e14a72d7725dab45d32b3b145f29"
@@ -168,7 +182,7 @@ int main(int argc, char **argv)
     EXPECT_SUCCESS(s2n_tls13_keys_init(&secrets, S2N_HMAC_SHA256));
 
     /* Derive Early Secrets */
-    EXPECT_SUCCESS(s2n_tls13_derive_early_secrets(&secrets));
+    EXPECT_SUCCESS(s2n_tls13_derive_early_secrets(&secrets, NULL));
 
     S2N_BLOB_EXPECT_EQUAL(secrets.extract_secret, expected_early_secret);
     S2N_BLOB_EXPECT_EQUAL(secrets.derive_secret, expect_derived_handshake_secret);
@@ -238,6 +252,19 @@ int main(int argc, char **argv)
     EXPECT_SUCCESS(s2n_tls13_derive_application_secret(&secrets, &hash_state, &server_application_secret, S2N_SERVER));
     S2N_BLOB_EXPECT_EQUAL(expect_derived_server_application_traffic_secret, server_application_secret);
 
+    /* Update handshake hashes with Client Finished */
+    EXPECT_SUCCESS(s2n_hash_update(&hash_state, client_finished.data, client_finished.size));
+    
+    /* Test session resumption secret */
+    s2n_tls13_key_blob(master_resumption_secret, secrets.size);
+    EXPECT_SUCCESS(s2n_tls13_derive_resumption_master_secret(&secrets, &hash_state, &master_resumption_secret));
+    S2N_BLOB_EXPECT_EQUAL(expect_derived_master_resumption_secret, master_resumption_secret);
+
+    /* Test individual session resumption ticket secret */
+    s2n_tls13_key_blob(session_ticket_secret, secrets.size);
+    EXPECT_OK(s2n_tls13_derive_session_ticket_secret(&secrets, &master_resumption_secret, &ticket_nonce, &session_ticket_secret));
+    S2N_BLOB_EXPECT_EQUAL(expected_session_ticket_secret, session_ticket_secret);
+
     /* Test Traffic Keys */
     s2n_tls13_key_blob(handshake_traffic_client_key, 16);
     s2n_tls13_key_blob(handshake_traffic_client_iv, 12);
@@ -291,17 +318,51 @@ int main(int argc, char **argv)
         S2N_BLOB_FROM_HEX(expected_binder_key,
             "69fe131a3bbad5d63c64eebcc30e395b9d8107726a13d074e389dbc8a4e47256");
 
-        DEFER_CLEANUP(struct s2n_psk test_psk, s2n_psk_free);
-        EXPECT_SUCCESS(s2n_psk_init(&test_psk, S2N_PSK_TYPE_RESUMPTION));
-        EXPECT_SUCCESS(s2n_psk_new_secret(&test_psk, resumption_secret.data, resumption_secret.size));
+        DEFER_CLEANUP(struct s2n_psk test_psk, s2n_psk_wipe);
+        EXPECT_OK(s2n_psk_init(&test_psk, S2N_PSK_TYPE_RESUMPTION));
+        EXPECT_SUCCESS(s2n_psk_set_secret(&test_psk, resumption_secret.data, resumption_secret.size));
 
         DEFER_CLEANUP(struct s2n_tls13_keys test_keys, s2n_tls13_keys_free);
-        GUARD(s2n_tls13_keys_init(&test_keys, test_psk.hash_alg));
+        EXPECT_SUCCESS(s2n_tls13_keys_init(&test_keys, test_psk.hmac_alg));
 
         EXPECT_SUCCESS(s2n_tls13_derive_binder_key(&test_keys, &test_psk));
 
         S2N_BLOB_EXPECT_EQUAL(test_keys.extract_secret, expected_resumption_early_secret);
         S2N_BLOB_EXPECT_EQUAL(test_keys.derive_secret, expected_binder_key);
+    }
+
+    /* Test s2n_tls13_derive_early_secrets produces the correct secret when a psk is set. Values
+     * are taken from https://tools.ietf.org/html/rfc8448#section-4 */
+    {
+        S2N_BLOB_FROM_HEX(resumption_early_secret,
+            "9b2188e9b2fc6d64d71dc329900e20bb41915000f678aa839cbb797cb7d8332c");
+        S2N_BLOB_FROM_HEX(expected_derived_secret,
+            "5f1790bbd82c5e7d376ed2e1e52f8e6038c9346db61b43be9a52f77ef3998e80");
+
+        DEFER_CLEANUP(struct s2n_psk test_psk = { 0 }, s2n_psk_wipe);
+        EXPECT_OK(s2n_psk_init(&test_psk, S2N_PSK_TYPE_RESUMPTION));
+        test_psk.early_secret = resumption_early_secret;
+
+        DEFER_CLEANUP(struct s2n_tls13_keys test_keys = { 0 }, s2n_tls13_keys_free);
+        EXPECT_SUCCESS(s2n_tls13_keys_init(&test_keys, test_psk.hmac_alg));
+
+        EXPECT_SUCCESS(s2n_tls13_derive_early_secrets(&test_keys, &test_psk));
+
+        S2N_BLOB_EXPECT_EQUAL(test_keys.derive_secret, expected_derived_secret);
+    }
+
+    /* s2n_tls13_derive_early_secrets will error using a psk with an empty early secret */
+    {
+        struct s2n_blob empty_blob = { .data = NULL, .size = 0 };
+
+        DEFER_CLEANUP(struct s2n_psk test_psk = { 0 }, s2n_psk_wipe);
+        EXPECT_OK(s2n_psk_init(&test_psk, S2N_PSK_TYPE_RESUMPTION));
+        test_psk.early_secret = empty_blob;
+
+        DEFER_CLEANUP(struct s2n_tls13_keys test_keys = { 0 }, s2n_tls13_keys_free);
+        EXPECT_SUCCESS(s2n_tls13_keys_init(&test_keys, test_psk.hmac_alg));
+
+        EXPECT_FAILURE_WITH_ERRNO(s2n_tls13_derive_early_secrets(&test_keys, &test_psk), S2N_ERR_SAFETY);
     }
 
     END_TEST();

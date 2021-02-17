@@ -4,18 +4,19 @@
 * Abstract: supersingular isogeny key encapsulation (SIKE) protocol
 *********************************************************************************************/
 
-#include "sike_r1_kem.h"
-
 #include <string.h>
 #include "P503_internal_r1.h"
 #include "fips202_r1.h"
 #include "pq-crypto/s2n_pq_random.h"
 #include "utils/s2n_safety.h"
+#include "tls/s2n_kem.h"
+#include "pq-crypto/s2n_pq.h"
 
 int SIKE_P503_r1_crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 { // SIKE's key generation
   // Outputs: secret key sk (SIKE_P503_R1_SECRET_KEY_BYTES = MSG_BYTES + SECRETKEY_B_BYTES + SIKE_P503_R1_PUBLIC_KEY_BYTES bytes)
   //          public key pk (SIKE_P503_R1_PUBLIC_KEY_BYTES bytes)
+    ENSURE_POSIX(s2n_pq_is_enabled(), S2N_ERR_PQ_DISABLED);
 
     digit_t _sk[SECRETKEY_B_BYTES/sizeof(digit_t)];
 
@@ -39,6 +40,8 @@ int SIKE_P503_r1_crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsi
   // Input:   public key pk         (SIKE_P503_R1_PUBLIC_KEY_BYTES bytes)
   // Outputs: shared secret ss      (SIKE_P503_R1_SHARED_SECRET_BYTES bytes)
   //          ciphertext message ct (SIKE_P503_R1_CIPHERTEXT_BYTES = SIKE_P503_R1_PUBLIC_KEY_BYTES + MSG_BYTES bytes)
+    ENSURE_POSIX(s2n_pq_is_enabled(), S2N_ERR_PQ_DISABLED);
+
     const uint16_t G = 0;
     const uint16_t H = 1;
     const uint16_t P = 2;
@@ -79,6 +82,8 @@ int SIKE_P503_r1_crypto_kem_dec(unsigned char *ss, const unsigned char *ct, cons
   // Input:   secret key sk         (SIKE_P503_R1_SECRET_KEY_BYTES = MSG_BYTES + SECRETKEY_B_BYTES + SIKE_P503_R1_PUBLIC_KEY_BYTES bytes)
   //          ciphertext message ct (SIKE_P503_R1_CIPHERTEXT_BYTES = SIKE_P503_R1_PUBLIC_KEY_BYTES + MSG_BYTES bytes)
   // Outputs: shared secret ss      (SIKE_P503_R1_SHARED_SECRET_BYTES bytes)
+    ENSURE_POSIX(s2n_pq_is_enabled(), S2N_ERR_PQ_DISABLED);
+
     const uint16_t G = 0;
     const uint16_t H = 1;
     const uint16_t P = 2;
@@ -112,9 +117,13 @@ int SIKE_P503_r1_crypto_kem_dec(unsigned char *ss, const unsigned char *ct, cons
 
     // Generate shared secret ss <- H(m||ct) or output ss <- H(s||ct)
     EphemeralKeyGeneration_A(ephemeralsk_.d, c0_);
-    if (memcmp(c0_, ct, SIKE_P503_R1_PUBLIC_KEY_BYTES) != 0) {
-        memcpy(temp, sk, MSG_BYTES);
-    }
+
+    // Note: This step deviates from the NIST supplied code by using constant time operations.
+    // We only want to copy the data if c0_ and ct are different
+    bool dont_copy = s2n_constant_time_equals(c0_, ct, SIKE_P503_R1_PUBLIC_KEY_BYTES);
+    // The last argument to s2n_constant_time_copy_or_dont is dont and thus prevents the copy when non-zero/true
+    s2n_constant_time_copy_or_dont(temp, sk, MSG_BYTES, dont_copy);
+
     memcpy(&temp[MSG_BYTES], ct, SIKE_P503_R1_CIPHERTEXT_BYTES);
     cshake256_simple(ss, SIKE_P503_R1_SHARED_SECRET_BYTES, H, temp, SIKE_P503_R1_CIPHERTEXT_BYTES+MSG_BYTES);
 

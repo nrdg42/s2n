@@ -128,7 +128,7 @@ int s2n_connection_set_all_protocol_versions(struct s2n_connection *conn, uint8_
 #define S2N_DHPARAMS_2048 "../pems/dhparams_2048.pem"
 
 #define S2N_ONE_TRAILING_BYTE_CERT_BIN         "../pems/one_trailing_byte_cert.bin"
-#define S2N_TWO_TRAILING_BYTE_CERT_BIN         "../pems/two_trailing_byte_cert.bin"
+#define S2N_FOUR_TRAILING_BYTE_CERT_BIN        "../pems/four_trailing_byte_cert.bin"
 
 /* This is a certificate with a legacy SHA-1 signature on the root certificate. This is used to prove
  * that our certificate validation code does not fail a root certificate signed with SHA-1. */
@@ -154,6 +154,8 @@ int s2n_test_kem_with_kat(const struct s2n_kem *kem, const char *kat_file);
 int s2n_test_hybrid_ecdhe_kem_with_kat(const struct s2n_kem *kem, struct s2n_cipher_suite *cipher_suite,
         const char *cipher_pref_version, const char * kat_file_name, uint32_t server_key_message_length,
         uint32_t client_key_message_length);
+S2N_RESULT s2n_pq_noop_asm();
+bool s2n_pq_no_asm_available();
 
 /* Expects 2 s2n_blobs to be equal (same size and contents) */
 #define S2N_BLOB_EXPECT_EQUAL( blob1, blob2 ) do {              \
